@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+  site:
+    image: designsdigital/mvctest-site:composedv1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sitename
+    restart: always
+    networks:
+      sitenet:
+        aliases:
+          - sitealias
+          
+  mynginx:
+    restart: always  
+    image: designsdigital/mvctest-nginx:composedv1
+    build:
+      context: .
+      dockerfile: Nginx/Dockerfile
+    container_name: nginxsite
+    ports:
+      - "5100:5100"
+      - "5200:5200"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./LetsEncryptSite/dh-param/dhparam-2048.pem:/etc/ssl/certs/dhparam-2048.pem
+      - /docker-volumes/etc/letsencrypt/live/journey.direct/fullchain.pem:/etc/letsencrypt/live/journey.direct/fullchain.pem # // TODO: change journey.direct to required domain
+      - /docker-volumes/etc/letsencrypt/live/journey.direct/privkey.pem:/etc/letsencrypt/live/journey.direct/privkey.pem # // TODO: change journey.direct to required domain
+    networks:
+      - sitenet
+
+networks:
+  sitenet:
